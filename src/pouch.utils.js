@@ -314,6 +314,6 @@ if (typeof module !== 'undefined' && module.exports) {
   PouchUtils.ajax = ajax;
   PouchUtils.uuid = uuid;
 
-  PouchUtils.atob = atob.bind(null);
-  PouchUtils.btoa = btoa.bind(null);
+  PouchUtils.atob = atob.bind ? atob.bind(null) : atob;
+  PouchUtils.btoa = btoa.bind ? btoa.bind(null) : btoa;
 }
