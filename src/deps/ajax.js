@@ -12,11 +12,8 @@ if (typeof module !== 'undefined' && module.exports) {
 
 var NewBlob = function(data, datatype)
 {
-  var out;
-
   try {
-      out = new Blob([data], {type: datatype});
-      console.debug("case 1");
+      return new Blob([data], {type: datatype});
   }
   catch (e) {
       window.BlobBuilder = window.BlobBuilder ||
@@ -27,20 +24,17 @@ var NewBlob = function(data, datatype)
       if (e.name == 'TypeError' && window.BlobBuilder) {
           var bb = new BlobBuilder();
           bb.append(data);
-          out = bb.getBlob(datatype);
-          console.debug("case 2");
+          return bb.getBlob(datatype);
       }
       else if (e.name == "InvalidStateError") {
-          // InvalidStateError (tested on FF13 WinXP)
-          out = new Blob([data], {type: datatype});
-          console.debug("case 3");
+          // Try again...
+          return new Blob([data], {type: datatype});
       }
       else {
           // We're screwed, blob constructor unsupported entirely   
           throw Error("Cannot create blob on this platform");
       }
   }
-  return out;
 }
 
 var ajax = function ajax(options, callback) {
