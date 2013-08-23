@@ -6,6 +6,43 @@ if (typeof module !== 'undefined' && module.exports) {
   extend = require('./extend.js');
 }
 
+//
+// David Bergman: we add this more general method to create a blob
+//
+
+var NewBlob = function(data, datatype)
+{
+  var out;
+
+  try {
+      out = new Blob([data], {type: datatype});
+      console.debug("case 1");
+  }
+  catch (e) {
+      window.BlobBuilder = window.BlobBuilder ||
+              window.WebKitBlobBuilder ||
+              window.MozBlobBuilder ||
+              window.MSBlobBuilder;
+
+      if (e.name == 'TypeError' && window.BlobBuilder) {
+          var bb = new BlobBuilder();
+          bb.append(data);
+          out = bb.getBlob(datatype);
+          console.debug("case 2");
+      }
+      else if (e.name == "InvalidStateError") {
+          // InvalidStateError (tested on FF13 WinXP)
+          out = new Blob([data], {type: datatype});
+          console.debug("case 3");
+      }
+      else {
+          // We're screwed, blob constructor unsupported entirely   
+          throw Error("Cannot create blob on this platform");
+      }
+  }
+  return out;
+}
+
 var ajax = function ajax(options, callback) {
 
   if (typeof options === "function") {
@@ -115,7 +152,7 @@ var ajax = function ajax(options, callback) {
       if (xhr.status >= 200 && xhr.status < 300) {
         var data;
         if (options.binary) {
-          data = new Blob([xhr.response || ''], {
+          data = NewBlob([xhr.response || ''], {
             type: xhr.getResponseHeader('Content-Type')
           });
         } else {
